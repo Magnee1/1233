@@ -1,0 +1,370 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Lab_8
+{
+    public class UserList<T> : IEnumerable<T>
+    {
+        private class Element
+        {
+            public T Data { set; get; }
+            public Element Next { set; get; }
+            public Element Prev { set; get; }
+
+            public Element() { }
+            public Element(T a)
+            {
+                Data = a;
+                Next = null;
+                Prev = null;
+            }
+        }
+        Element Head = null;
+        Element Last = null;
+
+        /// <summary>
+        /// добавить в конец
+        /// </summary>
+        /// <param name="a"></param>
+        public void PushBack(T a)
+        {
+            Element tmp = new Element(a);
+            tmp.Prev = Last;
+            if (Head == null)
+            {
+                Last = tmp;
+                Head = Last;
+            }
+            else
+            {
+                Last.Next = tmp;
+                Last = tmp;
+            }
+        }
+
+        /// <summary>
+        /// добавить в начало
+        /// </summary>
+        /// <param name="a"></param>
+        public void PushFirst(T a)
+        {
+            Element tmp = new Element(a);
+            tmp.Next = Head;
+            if (Head == null)
+            {
+                Head = tmp;
+                Last = Head;
+            }
+            else
+            {
+                Head.Prev = tmp;
+                Head = tmp;
+            }
+        }
+
+        /// <summary>
+        /// удалить из начала
+        /// </summary>
+        /// <returns></returns>
+        public T PopFirst()
+        {
+            if (Head != null)
+            {
+                T a = Head.Data;
+                if (Head.Next != null)
+                {
+                    Head = Head.Next;
+                    Head.Prev = null;
+                }
+                else
+                {
+                    Head = null;
+                    Last = null;
+                }
+                return a;
+            }
+            else
+            {
+                return default(T);
+            }
+        }
+
+        /// <summary>
+        /// удалить с конца
+        /// </summary>
+        /// <returns></returns>
+        public T PopBack()
+        {
+            if (Last != null)
+            {
+                T a = Last.Data;
+                if (Last != null)
+                {
+                    Last = Last.Prev;
+                    if (Last != null)
+                    {
+                        Last.Next = null;
+                    }
+                    else
+                    {
+                        Clear();
+                        return a;
+                    }
+                }
+                else
+                {
+                    Head = null;
+                    Last = null;
+                }
+                return a;
+            }
+            else
+            {
+                return default(T);
+            }
+        }
+
+        /// <summary>
+        /// длина
+        /// </summary>
+        /// <returns></returns>
+        public int Count()
+        {
+            int count = 0;
+
+            Element tmp = Head;
+            while (tmp != null)
+            {
+                count++;
+                tmp = tmp.Next;
+            }
+            return count;
+        }
+
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            Element t = Head;
+            while (t != null)
+            {
+                yield return t.Data;
+                t = t.Next;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        /// <summary>
+        /// в строку
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            string s = "";
+            var t = Head;
+            while (t != null)
+            {
+                s = s + t.Data + " ";
+                t = t.Next;
+            }
+            return s;
+        }
+
+        /// <summary>
+        /// очистить
+        /// </summary>
+        public void Clear()
+        {
+            Head = null;
+        }
+
+        /// <summary>
+        /// поиск по индексу
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public T SearchIndex(int i)
+        {
+            int count = 1;
+            Element tmp = Head;
+            if (Count() >= i && i > 0)
+            {
+                while ((tmp.Next != null) && (count != i))
+                {
+                    count++;
+                    tmp = tmp.Next;
+                }
+                return tmp.Data;
+            }
+            return default;
+        }
+
+        /// <summary>
+        /// поиск по значению
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public bool SearchValue(T n)
+        {
+            if (Head == null)
+            {
+                return false;
+            }
+
+            Element p = Head;
+            while (p != null)
+            {
+                T i = p.Data;
+                if (n.Equals(i))
+                {
+                    return true;
+                }
+                p = p.Next;
+            }
+            return false;
+        }
+        public void AddAfter(int i, T a) // добавление после заданного
+        {
+            if (Head == null)
+                return;
+
+            Element tmp = new Element(a);
+            Element p = Head;
+            int count = 1;
+
+            while ((p.Next != null) && (count != i))
+            {
+                p = p.Next;
+                count++;
+            }
+
+            if (count == i)
+            {
+                tmp.Next = p.Next;
+                tmp.Prev = p;
+                p.Next = tmp;
+
+                if (tmp.Next == null)
+                    Last = tmp;
+                else
+                    tmp.Next.Prev = tmp;
+            }
+        }
+        public void AddBefore(int i, T a) // добавление перед заданным
+        {
+            if (Head == null)
+                return;
+
+            Element tmp = new Element(a);
+            Element p = Head;
+            int count = 1;
+
+            if (i == 1)
+            {
+                tmp.Next = Head;
+                Head.Prev = tmp;
+                Head = tmp;
+            }
+            else
+            {
+                i -= 1;
+
+                while ((p.Next.Next != null) && (count != i))
+                {
+                    p = p.Next;
+                    count++;
+                }
+
+                if (count == i)
+                {
+                    tmp.Next = p.Next;
+                    tmp.Prev = p;
+                    p.Next = tmp;
+
+                    if (tmp.Next == null)
+                        Last = tmp;
+                    else
+                        tmp.Next.Prev = tmp;
+                }
+            }
+        }
+        public void DelBefore(int i) // удаление перед заданным
+        {
+            if (Head == null || Head.Next == null)
+                return;
+            if (i == 2)
+            {
+                PopFirst();
+            }
+            else
+            {
+                Element p = Head;
+                Element q = p;
+                int count = 1;
+                while ((p.Next.Next != null) && (count != (i - 1)))
+                {
+                    q = p;
+                    p = p.Next;
+                    count++;
+                }
+                if (count == (i - 1))
+                {
+                    q.Next = p.Next;
+                    if (q.Next != null)
+                        q.Next.Prev = q;
+                }
+            }
+        }
+
+        public void DelAfter(int i) // удаление после заданного
+        {
+            if (Head == null || Head.Next == null)
+                return;
+            Element p = Head;
+            Element q = p;
+            int count = 1;
+            while ((p.Next != null) && (count != (i + 1)))
+            {
+                q = p;
+                p = p.Next;
+                count++;
+            }
+            if (count == (i + 1))
+            {
+                q.Next = p.Next;
+                if (q.Next != null)
+                    q.Next.Prev = q;
+                if (p.Next == null)
+                    Last = q;
+            }
+        }
+        public void PrintForward()
+        {
+            Element current = Head;
+            while (current != null)
+            {
+                Console.Write(current.Data + " ");
+                current = current.Next;
+            }
+            Console.WriteLine();
+        }
+
+        public void PrintReverse()
+        {
+            Element current = Last;
+            while (current != null)
+            {
+                Console.Write(current.Data + " ");
+                current = current.Prev;
+            }
+            Console.WriteLine();
+        }
+    }
+}
